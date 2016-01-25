@@ -26,6 +26,8 @@ socket.on('connect', () => {
     // since it could be any version earlier, assume the latest
   //socket.write(new Buffer('fe01', 'hex'));
 
+  // MC|PingHost compatible with 1.6.4, 1.5.2, 1.4.4
+  // TODO: extended ping for getting plugin list? see https://github.com/Dinnerbone/mcstatus/commit/6b6a5659156785bcaaa75980782215f777bd5b97 it gets more
   socket.write(new Buffer('fe01'+
       'fa'+ // plugin message
       '000b'+'004D0043007C00500069006E00670048006F00730074'+ // MC|PingHost,

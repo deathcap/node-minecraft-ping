@@ -1,6 +1,6 @@
 {
   "name": "mcping16",
-  "description": "",
+  "description": "sends a server list ping packet to pre-Netty Minecraft servers (1.6.4, 1.5.2, 1.4.4)",
   "version": "0.0.1",
   "main": "mcping16.js",
   "repository": {
@@ -11,6 +11,7 @@
     "minecraft",
     "minecraft16",
     "minecraft15",
+    "minecraft14",
     "protocol",
     "old",
     "ping"
