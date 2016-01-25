@@ -25,7 +25,15 @@ socket.on('connect', () => {
     // "Prior to the Minecraft 1.6, the client to server operation is much simpler, and only sends FE 01, with none of the following data."
     // since it could be any version earlier, assume the latest
   //socket.write(new Buffer('fe01', 'hex'));
-  socket.write(new Buffer('fe01fa000b004D0043007C00500069006E00670048006F00730074','hex'));
+
+  socket.write(new Buffer('fe01'+
+      'fa'+ // plugin message
+      '000b'+'004D0043007C00500069006E00670048006F00730074'+ // MC|PingHost,
+      '0007'+ // 7+len(hostname)
+      '4a'+   // protocol version (74, last)
+      '0000'+''+ // hostname TODO
+      '00000000' // port TODO
+      ,'hex'));
 });
 socket.on('end', () => {
   console.log('ended');
