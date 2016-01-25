@@ -27,5 +27,14 @@ socket.on('end', () => {
 });
 socket.on('data', (raw) => {
   console.log('data',raw);
-  console.log(raw.toString());
+  const packetID = raw.readUInt8(0);
+  if (packetID !== 0xff) {
+    throw new Error('unexpected packet id');
+  }
+  const length = raw.slice(1).readUInt16BE(); // in UCS-2/UTF-16 characters
+
+  const string = raw.slice(4).toString('ucs2');
+  console.log('response string',string);
+  const array = string.split('\xa7');
+  console.log('array',array);
 });
