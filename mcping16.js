@@ -45,8 +45,8 @@ socket.on('data', (raw) => {
     result.protocolVersion = parseInt(parts[1]);
     result.gameVersion = parts[2];
     result.motd = parts[3];
-    result.playersOnline = parts[4];
-    result.maxPlayers = parts[5];
+    result.playersOnline = parseInt(parts[4]);
+    result.maxPlayers = parseInt(parts[5]);
   } else {
     // http://wiki.vg/Server_List_Ping#1.4_to_1.5
     // "Prior to the Minecraft 1.6, the client to server operation is much simpler, and only sends FE 01, with none of the following data."
@@ -56,8 +56,8 @@ socket.on('data', (raw) => {
 
     const parts = string.split('\xa7');
     result.motd = parts[0];
-    result.playersOnline = parts[1];
-    result.maxPlayers = parts[2];
+    result.playersOnline = parseInt(parts[1]);
+    result.maxPlayers = parseInt(parts[2]);
   }
   console.log('result',result);
 });
