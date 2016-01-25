@@ -24,7 +24,8 @@ socket.on('connect', () => {
     // http://wiki.vg/Server_List_Ping#1.4_to_1.5
     // "Prior to the Minecraft 1.6, the client to server operation is much simpler, and only sends FE 01, with none of the following data."
     // since it could be any version earlier, assume the latest
-  socket.write(new Buffer('fe01', 'hex'));
+  //socket.write(new Buffer('fe01', 'hex'));
+  socket.write(new Buffer('fe01fa000b004D0043007C00500069006E00670048006F00730074','hex'));
 });
 socket.on('end', () => {
   console.log('ended');
