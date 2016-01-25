@@ -1,0 +1,21 @@
+{
+  "name": "mcping16",
+  "description": "",
+  "version": "0.0.1",
+  "main": "mcping16.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:deathcap/mcping16.git"
+  },
+  "keywords": [
+    "minecraft",
+    "minecraft16",
+    "minecraft15",
+    "protocol",
+    "old",
+    "ping"
+  ],
+  "dependencies": {
+  },
+  "license": "MIT"
+}
