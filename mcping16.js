@@ -2,6 +2,7 @@
 
 const net = require('net');
 const process = require('process');
+const ProtoDef = require('protodef').ProtoDef;
 
 if (process.argv.length < 4) {
   console.log('Usage: node mcping16.js <host> <port>');
@@ -11,16 +12,20 @@ if (process.argv.length < 4) {
 const host = process.argv[2];
 const port = parseInt(process.argv[3]);
 
-const MAGIC = new Buffer('\xfe\xfd');
-const REQUEST_CHALLENGE = new Buffer('\x09');
-const REQUEST_STATUS = new Buffer('\x00');
+const proto = new ProtoDef();
 
 const socket = net.connect(port, host);
 socket.on('connect', () => {
   console.log('connected');
 
-  //TODO rquest challenge token
+  // request challenge token
+  // TODO: encode/decode using protodef
+  socket.write(new Buffer('fefd090000000000000000', 'hex'));
 });
 socket.on('end', () => {
   console.log('ended');
+});
+socket.on('data', (raw) => {
+  console.log('data',raw);
+  console.log(raw.toString());
 });
