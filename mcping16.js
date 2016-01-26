@@ -5,24 +5,15 @@ const dgram = require('dgram');
 const process = require('process');
 const ProtoDef = require('protodef').ProtoDef;
 
-if (process.argv.length < 4) {
-  console.log('Usage: node mcping16.js <host> <port>');
-  process.exit(1);
-}
-
-const host = process.argv[2];
-const port = parseInt(process.argv[3]);
-
 //const proto = new ProtoDef(); // TODO
 
-ping_fe01(host, port);
-ping_fefd_udp(host, port);
-
 // the 2011 beta 1.9 query protocol from https://dinnerbone.com/blog/2011/10/14/minecraft-19-has-rcon-and-query
-function ping_fefd_udp(host, port) {
+function ping_fefd_udp(options, cb) {
+  const host = options.host;
+  const port = options.port;
   const udp = dgram.createSocket('udp4');
 
-  console.log('udp ping');
+  //console.log('udp ping');
 
   const STARTED = 0;
   const SENT_CHALLENGE_REQUEST = 1;
@@ -31,15 +22,16 @@ function ping_fefd_udp(host, port) {
   let state = 0;
 
   udp.on('error', (err) => {
-    console.log(`udp error:\n${err.stack}`);
+    //console.log(`udp error:\n${err.stack}`);
+    cb(err, null);
     udp.close();
   });
 
   udp.on('message', (msg, rinfo) => {
-    console.log(msg);
+    //console.log(msg);
     //console.log(`udp got: ${msg} from ${rinfo.address}:${rinfo.port}`);
     if (state === STARTED) {
-      console.log('received unexpected packet before sent anything');
+      cb(new Error('received unexpected packet before sent anything'), null);
       return;
     } else if (state === SENT_CHALLENGE_REQUEST) {
       // challenge token
@@ -47,13 +39,13 @@ function ping_fefd_udp(host, port) {
       // 00 00 00 00 id token (sent all zeros)
       // xx xx xx xx new challenge token
       if (msg[0] != 0x09) {
-        console.log('unexpected packet received after sent challenge request');
+        cb(new Error('unexpected packet received after sent challenge request'), null);
         return;
       }
       // challenge token is received as ASCII decimal string, but replied as encoded uint32be
       const challengeTokenString = msg.slice(5).toString();
       const challengeTokenInt = parseInt(challengeTokenString);
-      console.log('challenge token: '+challengeTokenInt);
+      //console.log('challenge token: '+challengeTokenInt);
       const challengeTokenBuffer = new Buffer(4);
       challengeTokenBuffer.writeUInt32BE(challengeTokenInt);
 
@@ -65,7 +57,7 @@ function ping_fefd_udp(host, port) {
         '00000000', // id token, again (extended status request)
         'hex');
 
-      console.log('requesting status');
+      //console.log('requesting status');
       //console.log(statusRequest.toString('hex'));
       udp.send(statusRequest, 0, statusRequest.length, port, host, function() {
         state = SENT_STATUS_REQUEST;
@@ -91,14 +83,15 @@ function ping_fefd_udp(host, port) {
       result.port = parseInt(array[24]);
       result.host = array[26];
       // TODO: online players comes last, parse it
-      console.log('result',result);
+      //console.log('result',result);
       state = DONE;
+      cb(null, result);
     }
   });
 
   udp.on('listening', () => {
     const address = udp.address();
-    console.log(`udp listening ${address.address}:${address.port}`);
+    //console.log(`udp listening ${address.address}:${address.port}`);
 
     // query request
     const request = new Buffer('fefd090000000000000000', 'hex');
@@ -110,6 +103,7 @@ function ping_fefd_udp(host, port) {
   udp.bind();
 }
 
+// not exposed
 function ping_fefd_tcp(host, port) {
   const socket = net.connect(port, host);
   socket.on('connect', () => {
@@ -127,10 +121,12 @@ function ping_fefd_tcp(host, port) {
   });
 }
 
-function ping_fe01(host, port) {
+function ping_fe01(options, cb) {
+  const host = options.host;
+  const port = options.port;
   const socket = net.connect(port, host);
   socket.on('connect', () => {
-    console.log('connected');
+    //console.log('connected');
 
     // MC|PingHost compatible with 1.6.4, 1.5.2, 1.4.4
     // TODO: extended ping for getting plugin list? see https://github.com/Dinnerbone/mcstatus/commit/6b6a5659156785bcaaa75980782215f777bd5b97 it gets more
@@ -146,8 +142,11 @@ function ping_fe01(host, port) {
   socket.on('end', () => {
     console.log('ended');
   });
+  socket.on('error', (err) => {
+    cb(err, null);
+  });
   socket.on('data', (raw) => {
-    console.log('data(fe01)',raw);
+    //console.log('data(fe01)',raw);
     const packetID = raw.readUInt8(0);
     if (packetID !== 0xff) {
       throw new Error('unexpected packet id');
@@ -155,13 +154,13 @@ function ping_fe01(host, port) {
     const length = raw.slice(1).readUInt16BE(); // in UCS-2/UTF-16 characters
 
     const string = raw.slice(4).toString('ucs2');
-    console.log('response string',string);
+    //console.log('response string',string);
     let result = {};
 
     if (string[0] == '\xa7') {
       // https://gist.github.com/Jckf/4574114#file-minecraftserver-java-L170
       const parts = string.split('\0');
-      console.log(parts);
+      //console.log(parts);
       result.pingVersion = parseInt(parts[0].slice(1));
       result.protocolVersion = parseInt(parts[1]);
       result.gameVersion = parts[2];
@@ -179,9 +178,12 @@ function ping_fe01(host, port) {
       result.playersOnline = parseInt(parts[1]);
       result.maxPlayers = parseInt(parts[2]);
     }
-    console.log('result',result);
-    // TODO: callback
+    //console.log('result',result);
+    cb(null, result);
   });
 }
 
-
+module.exports = {
+  ping_fefd_udp,
+  ping_fe01,
+};
