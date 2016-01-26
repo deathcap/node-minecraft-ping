@@ -74,7 +74,7 @@ function ping_fefd_udp(host, port) {
       //console.log('response', msg);
       //console.log('response', msg.toString('hex'));
       //console.log('response', msg.toString());
-      const array = msg.toString().split('\0');
+      const array = msg.toString('binary').split('\0');
       //console.log(array);
       let result = {};
       // example response array, some fields are not fixed strings
