@@ -14,20 +14,30 @@ const port = parseInt(process.argv[3]);
 
 //const proto = new ProtoDef(); // TODO
 
-ping_fe01(host, port);
+//ping_fe01(host, port);
+ping_fefd(host, port);
 
-function ping_fe01(host, port) {
+function ping_fefd_tcp(host, port) {
   const socket = net.connect(port, host);
   socket.on('connect', () => {
     console.log('connected');
 
     // request challenge token
     // TODO: encode/decode using protodef
-    //socket.write(new Buffer('fefd090000000000000000', 'hex')); // the 2011 beta 1.9 query protocol from https://dinnerbone.com/blog/2011/10/14/minecraft-19-has-rcon-and-query/
-      // http://wiki.vg/Server_List_Ping#1.4_to_1.5
-      // "Prior to the Minecraft 1.6, the client to server operation is much simpler, and only sends FE 01, with none of the following data."
-      // since it could be any version earlier, assume the latest
-    //socket.write(new Buffer('fe01', 'hex'));
+    socket.write(new Buffer('fefd090000000000000000', 'hex')); // the 2011 beta 1.9 query protocol from https://dinnerbone.com/blog/2011/10/14/minecraft-19-has-rcon-and-query/
+  });
+  socket.on('data', (raw) => {
+    console.log('data(fefd_tcp)', raw);
+    console.log(raw.toString());
+    // kinda useless, returns not very useful information, example: (redundant with ping_fe01)
+    // ['\xff\x16A Minecraft Server', '0', '20']
+  });
+}
+
+function ping_fe01(host, port) {
+  const socket = net.connect(port, host);
+  socket.on('connect', () => {
+    console.log('connected');
 
     // MC|PingHost compatible with 1.6.4, 1.5.2, 1.4.4
     // TODO: extended ping for getting plugin list? see https://github.com/Dinnerbone/mcstatus/commit/6b6a5659156785bcaaa75980782215f777bd5b97 it gets more
@@ -44,7 +54,7 @@ function ping_fe01(host, port) {
     console.log('ended');
   });
   socket.on('data', (raw) => {
-    console.log('data',raw);
+    console.log('data(fe01)',raw);
     const packetID = raw.readUInt8(0);
     if (packetID !== 0xff) {
       throw new Error('unexpected packet id');
@@ -77,6 +87,7 @@ function ping_fe01(host, port) {
       result.maxPlayers = parseInt(parts[2]);
     }
     console.log('result',result);
+    // TODO: callback
   });
 }
 
