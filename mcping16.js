@@ -15,7 +15,7 @@ const port = parseInt(process.argv[3]);
 
 //const proto = new ProtoDef(); // TODO
 
-//ping_fe01(host, port);
+ping_fe01(host, port);
 ping_fefd_udp(host, port);
 
 // the 2011 beta 1.9 query protocol from https://dinnerbone.com/blog/2011/10/14/minecraft-19-has-rcon-and-query
