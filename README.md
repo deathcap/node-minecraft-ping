@@ -2,13 +2,30 @@
 
 Sends a [server list ping](http://wiki.vg/Server_List_Ping#1.6) packet to Minecraft servers
 
-For 1.7+ and later, also try [node-minecraft-protocol](https://github.com/PrismarineJS/node-minecraft-protocol)'s ping.
-
 Usage:
 
     require('minecraft-ping').ping_fe01({host:'localhost', port:25565}, function(err, response) {
       console.log(err, response);
     });
+
+Several pings are supported. Version compatibility:
+
+| Minecraft Version | ping_fe01(*) | ping_fe | Netty status ping(**)
+| ------------- | ------------- | ------------- | -------------
+| 1.9 | YES  | YES | YES
+| 1.8.9 | YES  | YES | YES
+| 1.7.10 | YES  | YES | YES
+| 1.6.4 | YES  | slow | NO
+| 1.5.2 | YES  | slow | NO
+| 1.4.4 | YES  | slow | NO
+| 1.3.2 | NO | YES | NO
+| 1.2.5 | NO | YES | NO
+| earlier | NO | ? | NO
+
+(*) Not only FE01 bytes, also includes FA `MC|PingHost`, for efficient 1.6.4 compatibility (but ≤1.3.2 incompatibility)
+
+(**) As implemented in [node-minecraft-protocol](https://github.com/PrismarineJS/node-minecraft-protocol) src/ping.js
+
 
 
 Example:
