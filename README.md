@@ -1,18 +1,15 @@
 # node-minecraft-ping
 
-Sends a [server list ping](http://wiki.vg/Server_List_Ping#1.6) packet Minecraft servers (supports 1.4.4+)
+Sends a [server list ping](http://wiki.vg/Server_List_Ping#1.6) packet to Minecraft servers
 
 For 1.7+ and later, also try [node-minecraft-protocol](https://github.com/PrismarineJS/node-minecraft-protocol)'s ping.
 
 Usage:
 
-    require('mcping16').ping_fe01({host:'localhost', port:25565}, function(err, response) {
+    require('minecraft-ping').ping_fe01({host:'localhost', port:25565}, function(err, response) {
       console.log(err, response);
     });
 
-    require('mcping16').ping_fefd_udp({host:'localhost', port:25565}, function(err, response) {
-      console.log(err, response);
-    });
 
 Example:
 
@@ -49,9 +46,25 @@ Example responses from `ping_fe01`:
 }
 ```
 
-fe01 is a "legacy" ping but supported even on vanilla Minecraft 1.8.9 servers.
+fe01 is a "legacy" ping but supported even on vanilla Minecraft 1.8.9 servers. It has been tested on
+1.4.4, 1.5.2, 1.6.4, 1.7.10, 1.8.9, and 1.9 snapshot. `ping_fe01` includes `MC|PingHost` for efficient
+1.6.4 pings as well. It does not support 1.3.2 and 1.2.5.
 
-Example response from `ping\_fefd\_udp`:
+## ping_fe
+
+`ping_fe` sends nothing more than a single 0xfe byte, and only returns `motd`, `playersOnline`, and
+`maxPlayers`. No protocol or game version. However it works even on 1.2.5 and 1.3.2. It will also
+work on 1.4.4, 1.5.2, and 1.6.4, but is noticeably slower than `ping_fe01`. On 1.7.10, 1.8.9, and 1.9
+it responds quicker, but still lacks the protocol information also returned in `ping_fe01`.
+
+
+## ping_fefd_udp
+
+    require('minecraft-ping').ping_fefd_udp({host:'localhost', port:25565}, function(err, response) {
+      console.log(err, response);
+    });
+
+Example response from `ping_fefd_udp`:
 
 ```javascript
 { worldHeight: 128,
@@ -69,8 +82,6 @@ Example response from `ping\_fefd\_udp`:
 ```
 
 fefd_udp works on 1.5.2 but not newer (TODO: exact versions), and lacks the protocolVersion of fe01.
-
-There is also a fefd_tcp ping, but it returns only the MOTD and player count so it is not exposed by this module.
 
 ## License
 
