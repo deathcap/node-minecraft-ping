@@ -171,12 +171,8 @@ function ping_fe01(options, cb) {
       result.playersOnline = parseInt(parts[4]);
       result.maxPlayers = parseInt(parts[5]);
     } else {
-      // 0xfe 0xfd response lacks game version, so assume a reasonably old one
-      result.pingVersion = 0;
-      result.gameVersion = '1.5.2';
-      result.protocolVersion = -61; // pre-Netty, 1.5.2; https://github.com/PrismarineJS/minecraft-data/pull/92/files#diff-0ccb8c9bf6497574bdc134eb428dc649R782
-
       const parts = string.split('\xa7');
+      result.pingVersion = 0;
       result.motd = parts[0];
       result.playersOnline = parseInt(parts[1]);
       result.maxPlayers = parseInt(parts[2]);
@@ -203,8 +199,6 @@ function ping_fe(options, cb) {
     const parts = string.slice(4).split('\xa7');
     let result = {};
     result.pingVersion = -1; // I just made that up
-    result.gameVersion = options.assumeGameVersion || '1.3.2'; // or earlier
-    result.protocolVersion = options.assumeProtocolVersion || -39; // 1.3.2 pre-netty
     result.motd = parts[0];
     result.playersOnline = parseInt(parts[1]);
     result.maxPlayers = parseInt(parts[2]);
