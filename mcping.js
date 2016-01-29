@@ -103,26 +103,6 @@ function ping_fefd_udp(options, cb) {
   udp.bind();
 }
 
-// not exposed
-function ping_fefd_tcp(options, cb) {
-  const host = options.host;
-  const port = options.port;
-  const socket = net.connect(port, host);
-  socket.on('connect', () => {
-    console.log('connected');
-
-    // request challenge token
-    // TODO: encode/decode using protodef
-    socket.write(new Buffer('fefd090000000000000000', 'hex'));
-  });
-  socket.on('data', (raw) => {
-    console.log('data(fefd_tcp)', raw);
-    console.log(raw.toString());
-    // kinda useless, returns not very useful information, example: (redundant with ping_fe01)
-    // ['\xff\x16A Minecraft Server', '0', '20']
-  });
-}
-
 function ping_fe01(options, cb) {
   const host = options.host;
   const port = options.port;
@@ -208,7 +188,6 @@ function ping_fe(options, cb) {
 
 module.exports = {
   ping_fefd_udp,
-  ping_fefd_tcp,
   ping_fe01,
   ping_fe,
 };
