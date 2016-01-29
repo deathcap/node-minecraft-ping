@@ -54,7 +54,7 @@ function ping_fefd_udp(options, cb) {
         '00'+   // status type
         '00000000'+ // id token
         challengeTokenBuffer.toString('hex')+ // challenge token
-        '00000000', // id token, again (extended status request)
+        '00000000', // id token, again (extended status request) (see https://github.com/Dinnerbone/mcstatus/commit/6b6a5659156785bcaaa75980782215f777bd5b97 it gets more)
         'hex');
 
       //console.log('requesting status');
@@ -130,8 +130,9 @@ function ping_fe01(options, cb) {
   socket.on('connect', () => {
     //console.log('connected');
 
-    // MC|PingHost compatible with 1.6.4, 1.5.2, 1.4.4
-    // TODO: extended ping for getting plugin list? see https://github.com/Dinnerbone/mcstatus/commit/6b6a5659156785bcaaa75980782215f777bd5b97 it gets more
+    // FE01 ping compatible with 1.4.4, 1.5.2, 1.6.4(*), 1.7.10, 1.8.9, 1.9
+    // (*) MC|PingHost is required for 1.6.4, or it'll take ~2 seconds to get a reply
+    // (*) MC|PingHost is not compatible with 1.3.2 and earlier (java.io.IOException: Received string length longer than maximum allowed (19712 > 16)), for that see ping_fe
     socket.write(new Buffer('fe01'+
         'fa'+ // plugin message
         '000b'+'004D0043007C00500069006E00670048006F00730074'+ // MC|PingHost,
@@ -173,7 +174,7 @@ function ping_fe01(options, cb) {
       // 0xfe 0xfd response lacks game version, so assume a reasonably old one
       result.pingVersion = 0;
       result.gameVersion = '1.5.2';
-      result.protocolVersion = 61; // https://github.com/PrismarineJS/minecraft-data/pull/92/files#diff-0ccb8c9bf6497574bdc134eb428dc649R782
+      result.protocolVersion = -61; // pre-Netty, 1.5.2; https://github.com/PrismarineJS/minecraft-data/pull/92/files#diff-0ccb8c9bf6497574bdc134eb428dc649R782
 
       const parts = string.split('\xa7');
       result.motd = parts[0];
@@ -185,8 +186,35 @@ function ping_fe01(options, cb) {
   });
 }
 
+// 0xfe pings work on 1.3.2, and so do fe01, but not fe01 + MC|PingHost (used in ping_fe01)
+function ping_fe(options, cb) {
+  const host = options.host;
+  const port = options.port;
+  const socket = net.connect(port, host);
+  socket.on('connect', () => {
+    socket.write(new Buffer('fe', 'hex'));
+  });
+  socket.on('error', (err) => {
+    cb(err, null);
+  });
+  socket.on('data', (raw) => {
+    const string = raw.toString('ucs2');
+    //console.log('fe',string);
+    const parts = string.slice(4).split('\xa7');
+    let result = {};
+    result.pingVersion = -1; // I just made that up
+    result.gameVersion = options.assumeGameVersion || '1.3.2'; // or earlier
+    result.protocolVersion = options.assumeProtocolVersion || -39; // 1.3.2 pre-netty
+    result.motd = parts[0];
+    result.playersOnline = parseInt(parts[1]);
+    result.maxPlayers = parseInt(parts[2]);
+    cb(null, result);
+  });
+}
+
 module.exports = {
   ping_fefd_udp,
   ping_fefd_tcp,
   ping_fe01,
+  ping_fe,
 };

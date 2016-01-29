@@ -35,3 +35,12 @@ mcping.ping_fefd_tcp({host, port}, function(err, response) {
   console.log('received ping_fefd_tcp',response);
 
 });
+
+mcping.ping_fe({host, port}, function(err, response) {
+  if (err) {
+    console.log('ping_fe error',err);
+    return;
+  }
+
+  console.log('received ping_fe',response);
+});
