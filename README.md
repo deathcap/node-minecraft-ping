@@ -10,7 +10,7 @@ Usage:
 
 Several pings are supported. Version compatibility:
 
-| Minecraft Version | ping_fe01(*) | ping_fe | Netty status ping(**)
+| Minecraft Version | ping_fe01fa | ping_fe | Netty status ping(**)
 | ------------- | ------------- | ------------- | -------------
 | 1.9 | YES  | YES | YES
 | 1.8.9 | YES  | YES | YES
@@ -22,7 +22,7 @@ Several pings are supported. Version compatibility:
 | 1.2.5 | NO | YES | NO
 | earlier | NO | ? | NO
 
-(*) Not only FE01 bytes, also includes FA `MC|PingHost`, for efficient 1.6.4 compatibility (but ≤1.3.2 incompatibility)
+(*) FE01FA includes `MC|PingHost`, for efficient 1.6.4 compatibility (but ≤1.3.2 incompatibility)
 
 (**) As implemented in [node-minecraft-protocol](https://github.com/PrismarineJS/node-minecraft-protocol) src/ping.js
 

@@ -103,14 +103,14 @@ function ping_fefd_udp(options, cb) {
   udp.bind();
 }
 
-function ping_fe01(options, cb) {
+function ping_fe01fa(options, cb) {
   const host = options.host;
   const port = options.port;
   const socket = net.connect(port, host);
   socket.on('connect', () => {
     //console.log('connected');
 
-    // FE01 ping compatible with 1.4.4, 1.5.2, 1.6.4(*), 1.7.10, 1.8.9, 1.9
+    // FE01FA ping compatible with 1.4.4, 1.5.2, 1.6.4(*), 1.7.10, 1.8.9, 1.9
     // (*) MC|PingHost is required for 1.6.4, or it'll take ~2 seconds to get a reply
     // (*) MC|PingHost is not compatible with 1.3.2 and earlier (java.io.IOException: Received string length longer than maximum allowed (19712 > 16)), for that see ping_fe
     socket.write(new Buffer('fe01'+
@@ -129,7 +129,7 @@ function ping_fe01(options, cb) {
     cb(err, null);
   });
   socket.on('data', (raw) => {
-    //console.log('data(fe01)',raw);
+    //console.log('data(fe01fa)',raw);
     const packetID = raw.readUInt8(0);
     if (packetID !== 0xff) {
       throw new Error('unexpected packet id');
@@ -162,7 +162,7 @@ function ping_fe01(options, cb) {
   });
 }
 
-// 0xfe pings work on 1.3.2, and so do fe01, but not fe01 + MC|PingHost (used in ping_fe01)
+// 0xfe pings work on 1.3.2, and so do fe01, but not fe01fa + MC|PingHost (used in ping_fe01fa)
 function ping_fe(options, cb) {
   const host = options.host;
   const port = options.port;
@@ -188,6 +188,6 @@ function ping_fe(options, cb) {
 
 module.exports = {
   ping_fefd_udp,
-  ping_fe01,
+  ping_fe01fa,
   ping_fe,
 };

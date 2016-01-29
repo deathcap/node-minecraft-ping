@@ -10,13 +10,13 @@ if (process.argv.length < 4) {
 const host = process.argv[2];
 const port = parseInt(process.argv[3]);
 
-mcping.ping_fe01({host, port}, function(err, response) {
+mcping.ping_fe01fa({host, port}, function(err, response) {
   if (err) {
-    console.log('ping_fe01 error',err);
+    console.log('ping_fe01fa error',err);
     return;
   }
 
-  console.log('received ping_fe01',response);
+  console.log('received ping_fe01fa',response);
 });
 
 mcping.ping_fefd_udp({host, port}, function(err, response) {
