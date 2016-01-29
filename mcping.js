@@ -104,7 +104,9 @@ function ping_fefd_udp(options, cb) {
 }
 
 // not exposed
-function ping_fefd_tcp(host, port) {
+function ping_fefd_tcp(options, cb) {
+  const host = options.host;
+  const port = options.port;
   const socket = net.connect(port, host);
   socket.on('connect', () => {
     console.log('connected');
@@ -185,5 +187,6 @@ function ping_fe01(options, cb) {
 
 module.exports = {
   ping_fefd_udp,
+  ping_fefd_tcp,
   ping_fe01,
 };

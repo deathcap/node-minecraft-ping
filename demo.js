@@ -21,8 +21,17 @@ mcping.ping_fe01({host, port}, function(err, response) {
 
 mcping.ping_fefd_udp({host, port}, function(err, response) {
   if (err) {
-    console.log('ping_fefd error',err);
+    console.log('ping_fefd_udp error',err);
     return;
   }
-  console.log('received ping_fefd',response);
+  console.log('received ping_fefd_udp',response);
+});
+
+mcping.ping_fefd_tcp({host, port}, function(err, response) {
+  if (err) {
+    console.log('ping_fefd_tcp error',err);
+    return;
+  }
+  console.log('received ping_fefd_tcp',response);
+
 });
