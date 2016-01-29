@@ -15,8 +15,23 @@ mcping.ping_fe01fa({host, port}, function(err, response) {
     console.log('ping_fe01fa error',err);
     return;
   }
-
   console.log('received ping_fe01fa',response);
+});
+
+mcping.ping_fe01({host, port}, function(err, response) {
+  if (err) {
+    console.log('ping_fe01 error',err);
+    return;
+  }
+  console.log('received ping_fe01',response);
+});
+
+mcping.ping_fe({host, port}, function(err, response) {
+  if (err) {
+    console.log('ping_fe error',err);
+    return;
+  }
+  console.log('received ping_fe',response);
 });
 
 mcping.ping_fefd_udp({host, port}, function(err, response) {
@@ -27,11 +42,4 @@ mcping.ping_fefd_udp({host, port}, function(err, response) {
   console.log('received ping_fefd_udp',response);
 });
 
-mcping.ping_fe({host, port}, function(err, response) {
-  if (err) {
-    console.log('ping_fe error',err);
-    return;
-  }
 
-  console.log('received ping_fe',response);
-});

@@ -104,16 +104,10 @@ function ping_fefd_udp(options, cb) {
 }
 
 function ping_fe01fa(options, cb) {
-  const host = options.host;
-  const port = options.port;
-  const socket = net.connect(port, host);
-  socket.on('connect', () => {
-    //console.log('connected');
-
-    // FE01FA ping compatible with 1.4.4, 1.5.2, 1.6.4(*), 1.7.10, 1.8.9, 1.9
-    // (*) MC|PingHost is required for 1.6.4, or it'll take ~2 seconds to get a reply
-    // (*) MC|PingHost is not compatible with 1.3.2 and earlier (java.io.IOException: Received string length longer than maximum allowed (19712 > 16)), for that see ping_fe
-    socket.write(new Buffer('fe01'+
+  // FE01FA ping compatible with 1.4.4, 1.5.2, 1.6.4(*), 1.7.10, 1.8.9, 1.9
+  // (*) MC|PingHost is required for 1.6.4, or it'll take ~2 seconds to get a reply
+  // (*) MC|PingHost is not compatible with 1.3.2 and earlier (java.io.IOException: Received string length longer than maximum allowed (19712 > 16)), for that see ping_fe
+  _ping_buffer(options, cb, new Buffer('fe01'+
         'fa'+ // plugin message
         '000b'+'004D0043007C00500069006E00670048006F00730074'+ // MC|PingHost,
         '0007'+ // 7+len(hostname)
@@ -121,6 +115,19 @@ function ping_fe01fa(options, cb) {
         '0000'+''+ // hostname TODO
         '00000000' // port TODO
         ,'hex'));
+}
+
+function ping_fe01(options, cb) {
+  _ping_buffer(options, cb, new Buffer('fe01', 'hex'));
+}
+
+function _ping_buffer(options, cb, buffer) {
+  const host = options.host;
+  const port = options.port;
+  const socket = net.connect(port, host);
+  socket.on('connect', () => {
+    //console.log('connected');
+    socket.write(buffer);
   });
   socket.on('end', () => {
     console.log('ended');
@@ -189,5 +196,6 @@ function ping_fe(options, cb) {
 module.exports = {
   ping_fefd_udp,
   ping_fe01fa,
+  ping_fe01,
   ping_fe,
 };

@@ -4,35 +4,39 @@ Sends a [server list ping](http://wiki.vg/Server_List_Ping#1.6) packet to Minecr
 
 Usage:
 
-    require('minecraft-ping').ping_fe01({host:'localhost', port:25565}, function(err, response) {
+    require('minecraft-ping').ping_fe01fa({host:'localhost', port:25565}, function(err, response) {
       console.log(err, response);
     });
 
 Several pings are supported. Version compatibility:
 
-| Minecraft Version | ping_fe01fa | ping_fe | Netty status ping(**)
-| ------------- | ------------- | ------------- | -------------
-| 1.9 | YES  | YES | YES
-| 1.8.9 | YES  | YES | YES
-| 1.7.10 | YES  | YES | YES
-| 1.6.4 | YES  | slow | NO
-| 1.5.2 | YES  | slow | NO
-| 1.4.4 | YES  | slow | NO
-| 1.3.2 | NO | YES | NO
-| 1.2.5 | NO | YES | NO
-| earlier | NO | ? | NO
+| Minecraft Version | ping_fe01fa   | ping_fe01     | ping_fe       | Netty status ping(*)
+| -------------     | ------------- | ------------- | ------------- | -------------
+| 1.9               | YES           | YES           | Limited       | YES
+| 1.8.9             | YES           | YES           | Limited       | YES
+| 1.7.10            | YES           | YES           | Limited       | YES
+| 1.6.4             | YES           | Slow          | Limited, Slow | NO
+| 1.5.2             | YES           | YES           | Limited, Slow | NO
+| 1.4.4             | YES           | YES           | Limited, Slow | NO
+| 1.3.2             | NO            | Limited       | Limited       | NO
+| 1.2.5             | NO            | Limited       | Limited       | NO
+| earlier           | NO            | maybe         | probably      | NO
 
-(*) FE01FA includes `MC|PingHost`, for efficient 1.6.4 compatibility (but ≤1.3.2 incompatibility)
+(*) As implemented in [node-minecraft-protocol](https://github.com/PrismarineJS/node-minecraft-protocol) src/ping.js
 
-(**) As implemented in [node-minecraft-protocol](https://github.com/PrismarineJS/node-minecraft-protocol) src/ping.js
-
-
+(**) Limited = responds but does not return the game/protocol version
 
 Example:
 
     node demo.js localhost 25565
 
-Example responses from `ping_fe01`:
+### ping_fe01a
+
+`ping_fe01a` is the best general-purpose ping on most servers. It includes `MC|PingHost`,
+for efficient 1.6.4 compatibility (but ≤1.3.2 incompatibility). You can use it on old servers
+starting with 1.4.4 at the earliest, then 1.5.2 and 1.6.4, and it even works on Netty-based
+1.7.10, 1.8.9, and 1.9 servers. The protocol and game version is included in the ping so you
+can tell what protocol to speak to it. Example responses from `ping_fe01fa`:
 
 ```javascript
 {
@@ -63,9 +67,11 @@ Example responses from `ping_fe01`:
 }
 ```
 
-fe01 is a "legacy" ping but supported even on vanilla Minecraft 1.8.9 servers. It has been tested on
-1.4.4, 1.5.2, 1.6.4, 1.7.10, 1.8.9, and 1.9 snapshot. `ping_fe01` includes `MC|PingHost` for efficient
-1.6.4 pings as well. It does not support 1.3.2 and 1.2.5.
+`ping_fe01fa` does not support 1.3.2 and 1.2.5
+
+### ping_fe01
+
+
 
 ## ping_fe
 
