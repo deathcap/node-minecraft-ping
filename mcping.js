@@ -138,7 +138,7 @@ function _ping_buffer(options, cb, buffer, type) {
     //console.log('data(fe01fa)',raw);
     const packetID = raw.readUInt8(0);
     if (packetID !== 0xff) {
-      throw new Error('unexpected packet id');
+      cb(new Error('unexpected packet id'), null, type);
     }
     const length = raw.slice(1).readUInt16BE(); // in UCS-2/UTF-16 characters
 
