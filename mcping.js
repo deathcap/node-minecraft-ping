@@ -24,6 +24,11 @@ function ping_fe01(options, cb) {
   _ping_buffer(options, cb, new Buffer('fe01', 'hex'), 'fe01');
 }
 
+// plain FE pings work on 1.3.2, and so do fe01, but not fe01fa + MC|PingHost (used in ping_fe01fa)
+function ping_fe(options, cb) {
+  _ping_buffer(options, cb, new Buffer('fe', 'hex'), 'fe');
+}
+
 // the 2011 beta 1.9 query protocol from https://dinnerbone.com/blog/2011/10/14/minecraft-19-has-rcon-and-query
 function ping_fefd_udp(options, cb) {
   const host = options.host;
@@ -181,41 +186,6 @@ function _ping_buffer(options, cb, buffer, type) {
     //console.log('result',result);
     socket.end();
     cb(null, result, type);
-    calledCB = true;
-  });
-}
-
-// 0xfe pings work on 1.3.2, and so do fe01, but not fe01fa + MC|PingHost (used in ping_fe01fa)
-function ping_fe(options, cb) {
-  const host = options.host;
-  const port = options.port;
-  const socket = net.connect(port, host);
-  let calledCB = false;
-  socket.on('connect', () => {
-    socket.write(new Buffer('fe', 'hex'));
-  });
-  socket.on('error', (err) => {
-    cb(err, null, 'fe');
-    calledCB = true;
-  });
-  socket.on('end', () => {
-    //console.log('ended','fe);
-    if (!calledCB) {
-      cb(new Error('server unexpectedly closed connection'), null, type);
-      calledCB = true;
-    }
-  });
-  socket.on('data', (raw) => {
-    const string = raw.toString('ucs2');
-    //console.log('fe',string);
-    const parts = string.slice(4).split('\xa7');
-    let result = {};
-    result.pingVersion = -1; // I just made that up
-    result.motd = parts[0];
-    result.playersOnline = parseInt(parts[1]);
-    result.maxPlayers = parseInt(parts[2]);
-    socket.end();
-    cb(null, result, 'fe');
     calledCB = true;
   });
 }
