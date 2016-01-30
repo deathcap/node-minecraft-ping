@@ -129,7 +129,7 @@ function _ping_buffer(options, cb, buffer, type) {
     socket.write(buffer);
   });
   socket.on('end', () => {
-    console.log('ended');
+    console.log('ended',type);
   });
   socket.on('error', (err) => {
     cb(err, null, type);
@@ -138,7 +138,9 @@ function _ping_buffer(options, cb, buffer, type) {
     //console.log('data(fe01fa)',raw);
     const packetID = raw.readUInt8(0);
     if (packetID !== 0xff) {
+      socket.end();
       cb(new Error('unexpected packet id'), null, type);
+      return;
     }
     const length = raw.slice(1).readUInt16BE(); // in UCS-2/UTF-16 characters
 
@@ -158,12 +160,18 @@ function _ping_buffer(options, cb, buffer, type) {
       result.maxPlayers = parseInt(parts[5]);
     } else {
       const parts = string.split('\xa7');
+      if (parts.length !== 3) {
+        socket.end();
+        cb(new Error('unexpected ping type response, started with 0xff but not followed by 0xa7 or 3 x 0xa7 parts'), null, type);
+        return;
+      }
       result.pingVersion = 0;
       result.motd = parts[0];
       result.playersOnline = parseInt(parts[1]);
       result.maxPlayers = parseInt(parts[2]);
     }
     //console.log('result',result);
+    socket.end();
     cb(null, result, type);
   });
 }
@@ -188,6 +196,7 @@ function ping_fe(options, cb) {
     result.motd = parts[0];
     result.playersOnline = parseInt(parts[1]);
     result.maxPlayers = parseInt(parts[2]);
+    socket.end();
     cb(null, result, 'fe');
   });
 }
