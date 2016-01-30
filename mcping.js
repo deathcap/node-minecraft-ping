@@ -124,15 +124,21 @@ function _ping_buffer(options, cb, buffer, type) {
   const host = options.host;
   const port = options.port;
   const socket = net.connect(port, host);
+  let calledCB = false;
   socket.on('connect', () => {
     //console.log('connected');
     socket.write(buffer);
   });
   socket.on('end', () => {
-    console.log('ended',type);
+    //console.log('ended',type);
+    if (!calledCB) {
+      cb(new Error('server unexpectedly closed connection'), null, type);
+      calledCB = true;
+    }
   });
   socket.on('error', (err) => {
     cb(err, null, type);
+    calledCB = true;
   });
   socket.on('data', (raw) => {
     //console.log('data(fe01fa)',raw);
@@ -140,6 +146,7 @@ function _ping_buffer(options, cb, buffer, type) {
     if (packetID !== 0xff) {
       socket.end();
       cb(new Error('unexpected packet id'), null, type);
+      calledCB = true;
       return;
     }
     const length = raw.slice(1).readUInt16BE(); // in UCS-2/UTF-16 characters
@@ -163,6 +170,7 @@ function _ping_buffer(options, cb, buffer, type) {
       if (parts.length !== 3) {
         socket.end();
         cb(new Error('unexpected ping type response, started with 0xff but not followed by 0xa7 or 3 x 0xa7 parts'), null, type);
+        calledCB = true;
         return;
       }
       result.pingVersion = 0;
@@ -173,6 +181,7 @@ function _ping_buffer(options, cb, buffer, type) {
     //console.log('result',result);
     socket.end();
     cb(null, result, type);
+    calledCB = true;
   });
 }
 
