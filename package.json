@@ -1,7 +1,7 @@
 {
   "name": "minecraft-ping",
   "description": "sends pings to Minecraft servers of various versions",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "main": "mcping.js",
   "repository": {
     "type": "git",
@@ -13,7 +13,6 @@
     "query",
     "ping"
   ],
-  "dependencies": {
-  },
+  "dependencies": {},
   "license": "MIT"
 }
