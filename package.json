@@ -16,7 +16,6 @@
     "ping"
   ],
   "dependencies": {
-    "protodef": "^0.2.5"
   },
   "license": "MIT"
 }

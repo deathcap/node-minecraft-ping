@@ -3,9 +3,6 @@
 const net = require('net');
 const dgram = require('dgram');
 const process = require('process');
-const ProtoDef = require('protodef').ProtoDef;
-
-//const proto = new ProtoDef(); // TODO
 
 // the 2011 beta 1.9 query protocol from https://dinnerbone.com/blog/2011/10/14/minecraft-19-has-rcon-and-query
 function ping_fefd_udp(options, cb) {
