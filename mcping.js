@@ -15,12 +15,13 @@ function ping_fe01fa(options, cb) {
         '4a'+   // protocol version (74, last)
         '0000'+''+ // hostname TODO
         '00000000' // port TODO
-        ,'hex'));
+        ,'hex'),
+      'fe01fa');
 }
 
 // FE01 compatible with 1.3.2 and 1.2.5 (unlike FE01FA), but slow on 1.6.4, although its fast on 1.4.4, 1.5.2, and 1.7.10+
 function ping_fe01(options, cb) {
-  _ping_buffer(options, cb, new Buffer('fe01', 'hex'));
+  _ping_buffer(options, cb, new Buffer('fe01', 'hex'), 'fe01');
 }
 
 // the 2011 beta 1.9 query protocol from https://dinnerbone.com/blog/2011/10/14/minecraft-19-has-rcon-and-query
@@ -39,7 +40,7 @@ function ping_fefd_udp(options, cb) {
 
   udp.on('error', (err) => {
     //console.log(`udp error:\n${err.stack}`);
-    cb(err, null);
+    cb(err, null, 'fefd_udp');
     udp.close();
   });
 
@@ -47,7 +48,7 @@ function ping_fefd_udp(options, cb) {
     //console.log(msg);
     //console.log(`udp got: ${msg} from ${rinfo.address}:${rinfo.port}`);
     if (state === STARTED) {
-      cb(new Error('received unexpected packet before sent anything'), null);
+      cb(new Error('received unexpected packet before sent anything'), null, 'fefd_udp');
       return;
     } else if (state === SENT_CHALLENGE_REQUEST) {
       // challenge token
@@ -55,7 +56,7 @@ function ping_fefd_udp(options, cb) {
       // 00 00 00 00 id token (sent all zeros)
       // xx xx xx xx new challenge token
       if (msg[0] != 0x09) {
-        cb(new Error('unexpected packet received after sent challenge request'), null);
+        cb(new Error('unexpected packet received after sent challenge request'), null, 'fefd_udp');
         return;
       }
       // challenge token is received as ASCII decimal string, but replied as encoded uint32be
@@ -101,7 +102,7 @@ function ping_fefd_udp(options, cb) {
       // TODO: online players comes last, parse it
       //console.log('result',result);
       state = DONE;
-      cb(null, result);
+      cb(null, result, 'fefd_udp');
     }
   });
 
@@ -119,7 +120,7 @@ function ping_fefd_udp(options, cb) {
   udp.bind();
 }
 
-function _ping_buffer(options, cb, buffer) {
+function _ping_buffer(options, cb, buffer, type) {
   const host = options.host;
   const port = options.port;
   const socket = net.connect(port, host);
@@ -131,7 +132,7 @@ function _ping_buffer(options, cb, buffer) {
     console.log('ended');
   });
   socket.on('error', (err) => {
-    cb(err, null);
+    cb(err, null, type);
   });
   socket.on('data', (raw) => {
     //console.log('data(fe01fa)',raw);
@@ -163,7 +164,7 @@ function _ping_buffer(options, cb, buffer) {
       result.maxPlayers = parseInt(parts[2]);
     }
     //console.log('result',result);
-    cb(null, result);
+    cb(null, result, type);
   });
 }
 
@@ -176,7 +177,7 @@ function ping_fe(options, cb) {
     socket.write(new Buffer('fe', 'hex'));
   });
   socket.on('error', (err) => {
-    cb(err, null);
+    cb(err, null, 'fe');
   });
   socket.on('data', (raw) => {
     const string = raw.toString('ucs2');
@@ -187,8 +188,15 @@ function ping_fe(options, cb) {
     result.motd = parts[0];
     result.playersOnline = parseInt(parts[1]);
     result.maxPlayers = parseInt(parts[2]);
-    cb(null, result);
+    cb(null, result, 'fe');
   });
+}
+
+function ping_all(options, cb) {
+  ping_fefd_udp(options, cb);
+  ping_fe01fa(options, cb);
+  ping_fe01(options, cb);
+  ping_fe(options, cb);
 }
 
 module.exports = {
@@ -196,4 +204,6 @@ module.exports = {
   ping_fe01fa,
   ping_fe01,
   ping_fe,
+
+  ping_all,
 };

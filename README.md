@@ -83,7 +83,7 @@ only server message of the day description, number of online players, and maximu
 If you need to support arbitrarily old versions, but do not mind the slow 1.6.4 response (for example,
 if you're sending a batch of ping requests over a long period of time), `ping_fe01` may be a good choice.
 
-## ping_fe
+### ping_fe
 
 `ping_fe` sends nothing more than a single 0xfe byte, and only returns `motd`, `playersOnline`, and
 `maxPlayers`. No protocol or game version. However it works even on 1.2.5 and 1.3.2. It will also
@@ -94,7 +94,7 @@ If all you need is the server description, and do not mind the slowness of 1.6.4
 `ping_fe`. It is not very useful in most situations, better served by `ping_fe01fa` or `ping_fe01`.
 
 
-## ping_fefd_udp
+### ping_fefd_udp
 
 `ping_fefd_udp` is a multi-step UDP-based query protocol described in 2011 at
 https://dinnerbone.com/blog/2011/10/14/minecraft-19-has-rcon-and-query (for Minecraft 1.9 *beta*).
@@ -134,6 +134,15 @@ On vanilla servers, support can be enabled by setting `enable-query=true` in `se
 
 where GS4 is apparently the "GameSpy4" protocol. Since it is off by default, you'll probably
 not need to use `ping_fefd_udp` except in very specialized situations.
+
+### ping_all
+
+`ping_all` sends all of the types of pings, and calls the callback multiple times.
+You can get the ping type with the third argument in the callback function.
+
+Note: synchronizing and waiting for each of the pings is currently out of the scope
+of this module (see https://github.com/deathcap/node-minecraft-ping/issues/4),
+in general it is preferrable to use only one ping type (suggestion: `ping_fe01fa`).
 
 ## License
 
