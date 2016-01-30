@@ -4,6 +4,25 @@ const net = require('net');
 const dgram = require('dgram');
 const process = require('process');
 
+// FE01FA ping compatible with 1.4.4, 1.5.2, 1.6.4(*), 1.7.10, 1.8.9, 1.9
+// (*) MC|PingHost is required for 1.6.4, or it'll take ~2 seconds to get a reply
+// (*) MC|PingHost is not compatible with 1.3.2 and earlier (java.io.IOException: Received string length longer than maximum allowed (19712 > 16)), for that see ping_fe
+function ping_fe01fa(options, cb) {
+  _ping_buffer(options, cb, new Buffer('fe01'+
+        'fa'+ // plugin message
+        '000b'+'004D0043007C00500069006E00670048006F00730074'+ // MC|PingHost,
+        '0007'+ // 7+len(hostname)
+        '4a'+   // protocol version (74, last)
+        '0000'+''+ // hostname TODO
+        '00000000' // port TODO
+        ,'hex'));
+}
+
+// FE01 compatible with 1.3.2 and 1.2.5 (unlike FE01FA), but slow on 1.6.4, although its fast on 1.4.4, 1.5.2, and 1.7.10+
+function ping_fe01(options, cb) {
+  _ping_buffer(options, cb, new Buffer('fe01', 'hex'));
+}
+
 // the 2011 beta 1.9 query protocol from https://dinnerbone.com/blog/2011/10/14/minecraft-19-has-rcon-and-query
 function ping_fefd_udp(options, cb) {
   const host = options.host;
@@ -98,24 +117,6 @@ function ping_fefd_udp(options, cb) {
   });
 
   udp.bind();
-}
-
-function ping_fe01fa(options, cb) {
-  // FE01FA ping compatible with 1.4.4, 1.5.2, 1.6.4(*), 1.7.10, 1.8.9, 1.9
-  // (*) MC|PingHost is required for 1.6.4, or it'll take ~2 seconds to get a reply
-  // (*) MC|PingHost is not compatible with 1.3.2 and earlier (java.io.IOException: Received string length longer than maximum allowed (19712 > 16)), for that see ping_fe
-  _ping_buffer(options, cb, new Buffer('fe01'+
-        'fa'+ // plugin message
-        '000b'+'004D0043007C00500069006E00670048006F00730074'+ // MC|PingHost,
-        '0007'+ // 7+len(hostname)
-        '4a'+   // protocol version (74, last)
-        '0000'+''+ // hostname TODO
-        '00000000' // port TODO
-        ,'hex'));
-}
-
-function ping_fe01(options, cb) {
-  _ping_buffer(options, cb, new Buffer('fe01', 'hex'));
 }
 
 function _ping_buffer(options, cb, buffer) {

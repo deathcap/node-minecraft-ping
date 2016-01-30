@@ -30,9 +30,10 @@ Example:
 
     node demo.js localhost 25565
 
-### ping_fe01a
+### ping_fe01fa
 
-`ping_fe01a` is the best general-purpose ping on most servers. It includes `MC|PingHost`,
+`ping_fe01fa` is the best general-purpose ping for most use cases, where a fast response and
+reasonable version compatibility is required. It includes `MC|PingHost`,
 for efficient 1.6.4 compatibility (but ≤1.3.2 incompatibility). You can use it on old servers
 starting with 1.4.4 at the earliest, then 1.5.2 and 1.6.4, and it even works on Netty-based
 1.7.10, 1.8.9, and 1.9 servers. The protocol and game version is included in the ping so you
@@ -67,11 +68,20 @@ can tell what protocol to speak to it. Example responses from `ping_fe01fa`:
 }
 ```
 
-`ping_fe01fa` does not support 1.3.2 and 1.2.5
+`ping_fe01fa` does not support 1.3.2 and 1.2.5.
 
 ### ping_fe01
 
+`ping_fe01` is similar to `ping_fe01fa`, but without the `MC|PingHost` channel. The missing
+`MC|PingHost` means it will respond slowly on 1.6.4 servers, but this has the advantage of
+not confusing 1.3.2 and 1.2.5 servers with the extra data.
 
+However, 1.3.2 and 1.2.5 servers respond only with limited information (no protocol payload,
+only server message of the day description, number of online players, and maximum player count).
+1.7.10 and above will respond quickly and include the full response, including protocol version.
+
+If you need to support arbitrarily old versions, but do not mind the slow 1.6.4 response (for example,
+if you're sending a batch of ping requests over a long period of time), `ping_fe01` may be a good choice.
 
 ## ping_fe
 
@@ -80,8 +90,14 @@ can tell what protocol to speak to it. Example responses from `ping_fe01fa`:
 work on 1.4.4, 1.5.2, and 1.6.4, but is noticeably slower than `ping_fe01`. On 1.7.10, 1.8.9, and 1.9
 it responds quicker, but still lacks the protocol information also returned in `ping_fe01`.
 
+If all you need is the server description, and do not mind the slowness of 1.6.4/1.5.2/1.4.4, consider
+`ping_fe`. It is not very useful in most situations, better served by `ping_fe01fa` or `ping_fe01`.
+
 
 ## ping_fefd_udp
+
+`ping_fefd_udp` is a multi-step UDP-based query protocol described in 2011 at
+https://dinnerbone.com/blog/2011/10/14/minecraft-19-has-rcon-and-query (for Minecraft 1.9 *beta*).
 
     require('minecraft-ping').ping_fefd_udp({host:'localhost', port:25565}, function(err, response) {
       console.log(err, response);
@@ -104,7 +120,20 @@ Example response from `ping_fefd_udp`:
 }
 ```
 
-fefd_udp works on 1.5.2 but not newer (TODO: exact versions), and lacks the protocolVersion of fe01.
+It can be used to query modified servers, such as CraftBukkit, in order to get their installed plugins.
+Unlike the fe pings, it does not include the protocol version, though it does include the game version.
+
+On vanilla servers, support can be enabled by setting `enable-query=true` in `server.properties`
+(and optionally `query.port`, which defaults to the same as `server-port`). If enabled, the server will log:
+
+```
+2016-01-30 11:28:10 [INFO] Starting GS4 status listener
+2016-01-30 11:28:11 [INFO] Setting default query port to 25565
+2016-01-30 11:28:11 [INFO] Query running on 0.0.0.0:25565
+```
+
+where GS4 is apparently the "GameSpy4" protocol. Since it is off by default, you'll probably
+not need to use `ping_fefd_udp` except in very specialized situations.
 
 ## License
 
