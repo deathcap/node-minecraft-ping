@@ -9,10 +9,8 @@
   },
   "keywords": [
     "minecraft",
-    "minecraft16",
-    "minecraft15",
-    "minecraft14",
     "protocol",
+    "query",
     "ping"
   ],
   "dependencies": {
