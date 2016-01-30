@@ -206,4 +206,5 @@ module.exports = {
   ping_fe,
 
   ping_all,
+  ping: ping_fe01fa
 };

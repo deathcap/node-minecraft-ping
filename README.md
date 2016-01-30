@@ -68,7 +68,10 @@ can tell what protocol to speak to it. Example responses from `ping_fe01fa`:
 }
 ```
 
-`ping_fe01fa` does not support 1.3.2 and 1.2.5.
+`ping_fe01fa` does not support 1.3.2 and 1.2.5. If you need to be compatible with older versions,
+see `ping_fe01`, `ping_fe`, and/or `ping_fefd_udp`.
+
+`ping_fe01fa` is also exported as `ping`, since it is expected to be the most commonly used ping type.
 
 ### ping_fe01
 
