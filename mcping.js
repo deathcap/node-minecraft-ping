@@ -190,11 +190,20 @@ function ping_fe(options, cb) {
   const host = options.host;
   const port = options.port;
   const socket = net.connect(port, host);
+  let calledCB = false;
   socket.on('connect', () => {
     socket.write(new Buffer('fe', 'hex'));
   });
   socket.on('error', (err) => {
     cb(err, null, 'fe');
+    calledCB = true;
+  });
+  socket.on('end', () => {
+    //console.log('ended','fe);
+    if (!calledCB) {
+      cb(new Error('server unexpectedly closed connection'), null, type);
+      calledCB = true;
+    }
   });
   socket.on('data', (raw) => {
     const string = raw.toString('ucs2');
@@ -207,6 +216,7 @@ function ping_fe(options, cb) {
     result.maxPlayers = parseInt(parts[2]);
     socket.end();
     cb(null, result, 'fe');
+    calledCB = true;
   });
 }
 
