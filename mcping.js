@@ -137,8 +137,8 @@ function _ping_buffer(options, cb, buffer, type) {
 
   const socket = net.connect(port, host);
   socket.setTimeout(timeout, function () {
-      if (callback != undefined) {
-          callback(new Error("Socket timed out when connecting to " + host + ":" + port), null);
+      if (cb != undefined) {
+          cb(new Error("Socket timed out when connecting to " + host + ":" + port), null);
       }
       socket.end();
       socket.destroy();
