@@ -128,7 +128,21 @@ function ping_fefd_udp(options, cb) {
 function _ping_buffer(options, cb, buffer, type) {
   const host = options.host;
   const port = options.port;
+  var timeout = 3000;
+  if (options.timeout) {
+      timeout = options.timeout;
+  }
+  const start = Date.now();
+
+
   const socket = net.connect(port, host);
+  socket.setTimeout(timeout, function () {
+      if (cb != undefined) {
+          cb(new Error("Socket timed out when connecting to " + host + ":" + port), null);
+      }
+      socket.end();
+      socket.destroy();
+  });
   let calledCB = false;
   socket.on('connect', () => {
     //console.log('connected');
@@ -183,6 +197,7 @@ function _ping_buffer(options, cb, buffer, type) {
       result.playersOnline = parseInt(parts[1]);
       result.maxPlayers = parseInt(parts[2]);
     }
+    result.latency = Date.now() - start;
     //console.log('result',result);
     socket.end();
     cb(null, result, type);
