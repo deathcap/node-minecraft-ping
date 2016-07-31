@@ -4,6 +4,8 @@ const net = require('net');
 const dgram = require('dgram');
 const process = require('process');
 
+var timeout = 0;
+
 // FE01FA ping compatible with 1.4.4, 1.5.2, 1.6.4(*), 1.7.10, 1.8.9, 1.9
 // (*) MC|PingHost is required for 1.6.4, or it'll take ~2 seconds to get a reply
 // (*) MC|PingHost is not compatible with 1.3.2 and earlier (java.io.IOException: Received string length longer than maximum allowed (19712 > 16)), for that see ping_fe
@@ -130,6 +132,9 @@ function _ping_buffer(options, cb, buffer, type) {
   const port = options.port;
   const socket = net.connect(port, host);
   let calledCB = false;
+
+  socket.setTimeout(timeout);
+
   socket.on('connect', () => {
     //console.log('connected');
     socket.write(buffer);
@@ -145,6 +150,11 @@ function _ping_buffer(options, cb, buffer, type) {
     cb(err, null, type);
     calledCB = true;
   });
+  socket.on('timeout', (err) => {
+    cb('TCP timeout!', null, type);
+    calledCB = true;
+    socket.end();
+  });
   socket.on('data', (raw) => {
     //console.log('data(fe01fa)',raw);
     const packetID = raw.readUInt8(0);
@@ -154,6 +164,12 @@ function _ping_buffer(options, cb, buffer, type) {
       calledCB = true;
       return;
     }
+    if (raw.length < 8) {
+      socket.end();
+      cb(new Error('packet too short'), null, type);
+      calledCB = true;
+      return;
+    }    
     const length = raw.slice(1).readUInt16BE(); // in UCS-2/UTF-16 characters
 
     const string = raw.slice(4).toString('ucs2');
@@ -197,6 +213,10 @@ function ping_all(options, cb) {
   ping_fe(options, cb);
 }
 
+function setTimeout(ms) {
+  timeout = ms;
+}
+
 module.exports = {
   ping_fefd_udp,
   ping_fe01fa,
@@ -204,5 +224,6 @@ module.exports = {
   ping_fe,
 
   ping_all,
-  ping: ping_fe01fa
+  ping: ping_fe01fa,
+  setTimeout: setTimeout
 };
