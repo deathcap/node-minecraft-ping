@@ -213,6 +213,10 @@ function ping_all(options, cb) {
   ping_fe(options, cb);
 }
 
+function setTimeout(ms) {
+  timeout = ms;
+}
+
 module.exports = {
   ping_fefd_udp,
   ping_fe01fa,
@@ -220,5 +224,6 @@ module.exports = {
   ping_fe,
 
   ping_all,
-  ping: ping_fe01fa
+  ping: ping_fe01fa,
+  setTimeout: setTimeout
 };
