@@ -104,7 +104,11 @@ function ping_fefd_udp(options, cb) {
       result.maxPlayers = parseInt(array[22]);
       result.port = parseInt(array[24]);
       result.host = array[26];
-      // TODO: online players comes last, parse it
+      var players = [];
+      for(var i=30;i<array.length-2;i++){
+        players.push(array[i]);
+      }
+      result.players = players;
       //console.log('result',result);
       state = DONE;
       cb(null, result, 'fefd_udp');
