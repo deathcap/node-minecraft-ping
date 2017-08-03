@@ -104,7 +104,11 @@ function ping_fefd_udp(options, cb) {
       result.maxPlayers = parseInt(array[22]);
       result.port = parseInt(array[24]);
       result.host = array[26];
-      // TODO: online players comes last, parse it
+      var players = [];
+      for(var i=30;i<array.length-2;i++){
+        players.push(array[i]);
+      }
+      result.players = players;
       //console.log('result',result);
       state = DONE;
       cb(null, result, 'fefd_udp');
@@ -123,6 +127,15 @@ function ping_fefd_udp(options, cb) {
   });
 
   udp.bind();
+
+  function timeout() {
+    setTimeout(function(){
+      if(state !== 3){
+        udp.close;cb('timeout', null, 'fefd_udp');
+      }
+    }, 2000);
+  }
+  timeout();
 }
 
 function _ping_buffer(options, cb, buffer, type) {
