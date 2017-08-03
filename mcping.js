@@ -127,6 +127,15 @@ function ping_fefd_udp(options, cb) {
   });
 
   udp.bind();
+
+  function timeout() {
+    setTimeout(function(){
+      if(state !== 3){
+        udp.close;cb('timeout', null, 'fefd_udp');
+      }
+    }, 2000);
+  }
+  timeout();
 }
 
 function _ping_buffer(options, cb, buffer, type) {
