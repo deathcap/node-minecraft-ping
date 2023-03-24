@@ -2,7 +2,11 @@
 
 const net = require('net');
 const dgram = require('dgram');
-const process = require('process');
+
+const STARTED = 0;
+const SENT_CHALLENGE_REQUEST = 1;
+const SENT_STATUS_REQUEST = 2;
+const DONE = 3;
 
 // FE01FA ping compatible with 1.4.4, 1.5.2, 1.6.4(*), 1.7.10, 1.8.9, 1.9
 // (*) MC|PingHost is required for 1.6.4, or it'll take ~2 seconds to get a reply
@@ -33,14 +37,11 @@ function ping_fe(options, cb) {
 function ping_fefd_udp(options, cb) {
   const host = options.host;
   const port = options.port;
+  const timeout = options.timeout || 2000;
   const udp = dgram.createSocket('udp4');
 
   //console.log('udp ping');
 
-  const STARTED = 0;
-  const SENT_CHALLENGE_REQUEST = 1;
-  const SENT_STATUS_REQUEST = 2;
-  const DONE = 3;
   let state = 0;
 
   udp.on('error', (err) => {
@@ -128,14 +129,12 @@ function ping_fefd_udp(options, cb) {
 
   udp.bind();
 
-  function timeout() {
-    setTimeout(function(){
-      if(state !== 3){
-        udp.close;cb('timeout', null, 'fefd_udp');
-      }
-    }, 2000);
-  }
-  timeout();
+  setTimeout(function(){
+    if (state !== DONE){
+      cb('timeout', null, 'fefd_udp');
+    }
+    udp.close();
+  }, timeout);
 }
 
 function _ping_buffer(options, cb, buffer, type) {
